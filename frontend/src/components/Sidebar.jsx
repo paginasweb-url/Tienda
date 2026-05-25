@@ -5,26 +5,52 @@ import {
   Boxes,
   ArrowLeftRight,
   BarChart3,
+  Users,
   LogOut,
-  Users
+  X
 } from 'lucide-react';
 
-function Sidebar() {
+function Sidebar({ menuOpen, setMenuOpen }) {
   const location = useLocation();
+
   const usuario = JSON.parse(localStorage.getItem('usuario'));
+  const esAdmin = usuario?.rol === 'ADMIN';
 
   const links = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'ALMACENERO', 'VENDEDOR'] },
-    { path: '/productos', label: 'Productos', icon: Package, roles: ['ADMIN', 'ALMACENERO'] },
-    { path: '/stock', label: 'Stock', icon: Boxes, roles: ['ADMIN', 'ALMACENERO', 'VENDEDOR'] },
-    { path: '/movimientos', label: 'Movimientos', icon: ArrowLeftRight, roles: ['ADMIN', 'ALMACENERO', 'VENDEDOR'] },
-    { path: '/reportes', label: 'Reportes', icon: BarChart3, roles: ['ADMIN', 'ALMACENERO'] },
-    { path: '/usuarios', label: 'Usuarios', icon: Users, roles: ['ADMIN'] }
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      path: '/productos',
+      label: 'Productos',
+      icon: Package
+    },
+    {
+      path: '/stock',
+      label: 'Stock',
+      icon: Boxes
+    },
+    {
+      path: '/movimientos',
+      label: 'Movimientos',
+      icon: ArrowLeftRight
+    },
+    {
+      path: '/reportes',
+      label: 'Reportes',
+      icon: BarChart3
+    }
   ];
 
-  const linksFiltrados = links.filter((item) =>
-    item.roles.includes(usuario?.rol)
-  );
+  if (esAdmin) {
+    links.push({
+      path: '/usuarios',
+      label: 'Usuarios',
+      icon: Users
+    });
+  }
 
   const cerrarSesion = () => {
     localStorage.clear();
@@ -32,41 +58,76 @@ function Sidebar() {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 text-white flex flex-col">
-      <div className="p-6 text-2xl font-bold border-b border-slate-700">
-        J&E
-      </div>
+    <>
+      {menuOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
 
-      <nav className="flex-1 p-4 space-y-2">
-        {linksFiltrados.map((item) => {
-          const Icon = item.icon;
-          const active = location.pathname === item.path;
-
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-                active
-                  ? 'bg-white text-slate-900'
-                  : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              <Icon size={20} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <button
-        onClick={cerrarSesion}
-        className="m-4 flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-red-600 hover:text-white transition"
+      <aside
+        className={`
+          fixed md:static z-50 top-0 left-0 h-screen w-64
+          bg-slate-950 text-white flex flex-col
+          transition-transform duration-300
+          ${menuOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+        `}
       >
-        <LogOut size={20} />
-        Cerrar sesión
-      </button>
-    </aside>
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-black">
+              J&E
+            </h1>
+
+            <p className="text-slate-400 text-sm mt-1">
+              Inventory System
+            </p>
+          </div>
+
+          <button
+            className="md:hidden"
+            onClick={() => setMenuOpen(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          {links.map((item) => {
+            const Icon = item.icon;
+            const active = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition ${
+                  active
+                    ? 'bg-white text-slate-900'
+                    : 'text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Icon size={20} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-slate-800">
+          <button
+            onClick={cerrarSesion}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-300 hover:bg-red-600 hover:text-white transition"
+          >
+            <LogOut size={20} />
+            Cerrar sesión
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
 

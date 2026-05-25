@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Shirt, Eye, EyeOff } from 'lucide-react';
 import api from '../api/axios';
+import Swal from 'sweetalert2';
 
 function Login() {
   const navigate = useNavigate();
@@ -35,10 +36,21 @@ function Login() {
 
       navigate('/dashboard');
     } catch (error) {
-      setError(error.response?.data?.message || 'Error al iniciar sesión');
-    } finally {
-      setLoading(false);
-    }
+  const mensaje =
+    error.response?.data?.message ||
+    'Error al iniciar sesión';
+
+  setError(mensaje);
+
+  Swal.fire({
+    icon: 'error',
+    title: 'No se pudo iniciar sesión',
+    text: mensaje,
+    confirmButtonColor: '#0f172a'
+  });
+} finally {
+  setLoading(false);
+}
   };
 
   return (

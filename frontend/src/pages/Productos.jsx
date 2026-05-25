@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import Swal from 'sweetalert2';
 
 function Productos() {
   const [productos, setProductos] = useState([]);
@@ -137,24 +138,59 @@ function Productos() {
       obtenerProductos();
 
     } catch (error) {
-      alert(error.response?.data?.message || 'Error al guardar producto');
-      console.error(error);
-    }
-  };
 
-  const eliminarProducto = async (id) => {
-    const confirmar = confirm('¿Deseas eliminar este producto definitivamente?');
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text:
+      error.response?.data?.message ||
+      'Error al guardar producto'
+  });
 
-    if (!confirmar) return;
+  console.error(error);
+}
+};
 
-    try {
-      await api.delete(`/productos/${id}`);
-      obtenerProductos();
-    } catch (error) {
-      alert(error.response?.data?.message || 'Error al eliminar producto');
-      console.error(error);
-    }
-  };
+const eliminarProducto = async (id) => {
+
+const result = await Swal.fire({
+  title: '¿Eliminar producto?',
+  text: 'Esta acción eliminará el producto definitivamente',
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#dc2626',
+  cancelButtonColor: '#64748b',
+  confirmButtonText: 'Sí, eliminar',
+  cancelButtonText: 'Cancelar'
+});
+
+if (!result.isConfirmed) return;
+
+try {
+
+  await api.delete(`/productos/${id}`);
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Producto eliminado',
+    text: 'El producto fue eliminado correctamente'
+  });
+
+  obtenerProductos();
+
+} catch (error) {
+
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text:
+      error.response?.data?.message ||
+      'Error al eliminar producto'
+  });
+
+  console.error(error);
+}
+};
 
   if (loading) {
     return (

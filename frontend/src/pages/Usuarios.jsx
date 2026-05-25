@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UserPlus, Users, Shield } from 'lucide-react';
 import api from '../api/axios';
+import Swal from 'sweetalert2';
 
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -90,25 +91,57 @@ function Usuarios() {
       obtenerUsuarios();
 
     } catch (error) {
-      alert(error.response?.data?.message || 'Error al guardar usuario');
-      console.error(error);
-    }
-  };
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text:
+      error.response?.data?.message ||
+      'Error al guardar usuario'
+  });
 
-  const eliminarUsuario = async (id) => {
-    const confirmar = confirm('¿Deseas eliminar este usuario definitivamente?');
+  console.error(error);
+}
+};
 
-    if (!confirmar) return;
+const eliminarUsuario = async (id) => {
 
-    try {
-      await api.delete(`/usuarios/${id}`);
-      obtenerUsuarios();
-    } catch (error) {
-      alert(error.response?.data?.message || 'Error al eliminar usuario');
-      console.error(error);
-    }
-  };
+const result = await Swal.fire({
+  title: '¿Eliminar usuario?',
+  text: 'Esta acción no se puede deshacer',
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#dc2626',
+  cancelButtonColor: '#64748b',
+  confirmButtonText: 'Sí, eliminar',
+  cancelButtonText: 'Cancelar'
+});
 
+if (!result.isConfirmed) return;
+
+try {
+  await api.delete(`/usuarios/${id}`);
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Usuario eliminado',
+    text: 'El usuario fue eliminado correctamente'
+  });
+
+  obtenerUsuarios();
+
+} catch (error) {
+
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text:
+      error.response?.data?.message ||
+      'Error al eliminar usuario'
+  });
+
+  console.error(error);
+}
+};
   if (loading) {
     return (
       <div className="text-center py-10 text-slate-500">
