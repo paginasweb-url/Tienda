@@ -23,35 +23,44 @@ function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const { data } = await api.post('/auth/login', form);
+  try {
+    const { data } = await api.post('/auth/login', form);
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+    console.log('RESPUESTA LOGIN:', data);
 
-      navigate('/dashboard');
-    } catch (error) {
-  const mensaje =
-    error.response?.data?.message ||
-    'Error al iniciar sesión';
+    if (!data.token) {
+      throw new Error('El backend no devolvió token');
+    }
 
-  setError(mensaje);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('usuario', JSON.stringify(data.usuario));
 
-  Swal.fire({
-    icon: 'error',
-    title: 'No se pudo iniciar sesión',
-    text: mensaje,
-    confirmButtonColor: '#0f172a'
-  });
-} finally {
-  setLoading(false);
-}
-  };
+    navigate('/dashboard');
+
+  } catch (error) {
+    const mensaje =
+      error.response?.data?.message ||
+      error.message ||
+      'Error al iniciar sesión';
+
+    setError(mensaje);
+
+    Swal.fire({
+      icon: 'error',
+      title: 'No se pudo iniciar sesión',
+      text: mensaje,
+      confirmButtonColor: '#0f172a'
+    });
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 relative overflow-hidden">
